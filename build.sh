@@ -49,10 +49,14 @@ sudo umount -l "$R/etc/resolv.conf" 2>/dev/null || true; sudo rm -f "$R/etc/reso
 
 echo "== overlay (theme, shortcuts, input)"
 # Images are kept in git as base64 text (*.png.b64); turn them back into PNGs
-for b in $(find "$HERE/overlay" -name '*.png.b64'); do [ -f "${b%.b64}" ] || base64 -d "$b" > "${b%.b64}"; done
+# (always re-decode so an edited .b64 is never shadowed by a stale PNG; fail loudly on bad data)
+find "$HERE/overlay" -name '*.png.b64' -print0 | while IFS= read -r -d '' b; do
+  base64 -d "$b" > "${b%.b64}.tmp" && mv "${b%.b64}.tmp" "${b%.b64}"
+  head -c 8 "${b%.b64}" | od -An -tx1 | grep -q '89 50 4e 47' || { echo "Bad PNG from $b"; exit 1; }
+done
 sudo cp -r --no-preserve=ownership "$HERE/overlay/." "$R/"
 sudo find "$R/usr/share" -name '*.png.b64' -delete
-sudo chroot "$R" /bin/bash -c 'chmod +x /usr/local/bin/hana-* 2>/dev/null; glib-compile-schemas /usr/share/glib-2.0/schemas >/dev/null 2>&1 || true; update-desktop-database -q || true; im-config -n fcitx5 || true'
+sudo chroot "$R" /bin/bash -c 'gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null; chmod +x /usr/local/bin/hana-* 2>/dev/null; glib-compile-schemas /usr/share/glib-2.0/schemas >/dev/null 2>&1 || true; update-desktop-database -q || true; im-config -n fcitx5 || true'
 cleanup; trap - EXIT
 
 echo "== repack"
@@ -66,6 +70,8 @@ xorriso -indev "$BASE" -outdev "$ISO" \
   -map "$WORK/new.squashfs" /casper/minimal.squashfs \
   -map "$WORK/minimal.size" /casper/minimal.size \
   -map "$WORK/minimal.manifest" /casper/minimal.manifest \
+  -map "$HERE/iso/boot/grub/grub.cfg" /boot/grub/grub.cfg \
+  -map "$HERE/iso/boot/grub/loopback.cfg" /boot/grub/loopback.cfg \
   -rm /casper/SHA256SUMS /casper/SHA256SUMS.gpg -- \
   -volid "Hana Remix 24.04" \
   -boot_image any replay
