@@ -1,0 +1,7 @@
+/* Hana Remix: muted dusty rose + sage accents over Greybird */
+@define-color selected_bg_color #C9A3A8;
+@define-color theme_selected_bg_color #C9A3A8;
+@define-color theme_selected_fg_color #ffffff;
+*:selected, selection { background-color: #C9A3A8; color: #fff; }
+progressbar progress, scale highlight, switch:checked { background-color: #9DAE98; background-image: none; border-color: #8a9c86; }
+.xfce4-panel { background-color: #C9A3A8; }

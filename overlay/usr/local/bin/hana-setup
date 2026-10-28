@@ -1,0 +1,21 @@
+#!/bin/sh
+# First-login personalisation (runs once per user).
+M="$HOME/.config/hana-setup-done"; [ -f "$M" ] && exit 0
+sleep 3
+WP=/usr/share/backgrounds/hana/hana.png
+for p in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E 'last-image$'); do xfconf-query -c xfce4-desktop -p "$p" -s "$WP"; done
+for mon in $(xrandr --listmonitors 2>/dev/null | awk 'NR>1{print $NF}') monitor0 monitorVirtual-1; do
+  for ws in 0 1 2 3; do xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor$mon/workspace$ws/last-image -n -t string -s "$WP" 2>/dev/null; done
+done
+xfconf-query -c xsettings -p /Net/ThemeName -s Greybird 2>/dev/null
+xfconf-query -c xsettings -p /Gtk/FontName -n -t string -s "Noto Sans CJK JP 10"
+for id in $(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -E '^[0-9]+$'); do
+  xfconf-query -c xfce4-panel -p /panels/panel-$id/background-style -n -t uint -s 1
+  xfconf-query -c xfce4-panel -p /panels/panel-$id/background-rgba -n -t double -t double -t double -t double -s 0.788 -s 0.639 -s 0.659 -s 1
+done
+D="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"; mkdir -p "$D"
+for f in hana-freeapps hana-universe74 vlc; do
+  [ -f /usr/share/applications/$f.desktop ] && cp /usr/share/applications/$f.desktop "$D/" && chmod +x "$D/$f.desktop" && gio set "$D/$f.desktop" metadata::trusted true 2>/dev/null
+done
+mkdir -p "$(dirname "$M")"; touch "$M"
+xfdesktop --reload 2>/dev/null &

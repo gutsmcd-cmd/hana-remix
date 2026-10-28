@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Hana Remix setup
+Exec=/usr/local/bin/hana-setup
+NoDisplay=true
+X-GNOME-Autostart-Phase=Applications
