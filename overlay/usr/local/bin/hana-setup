@@ -13,14 +13,22 @@ for id in $(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -E '^[0-9]
   xfconf-query -c xfce4-panel -p /panels/panel-$id/background-style -n -t uint -s 1
   xfconf-query -c xfce4-panel -p /panels/panel-$id/background-rgba -n -t double -t double -t double -t double -s 0.788 -s 0.639 -s 0.659 -s 1
 done
+xdg-user-dirs-update 2>/dev/null
 D="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"; mkdir -p "$D"
 for f in hana-freeapps hana-universe74 vlc; do
   [ -f /usr/share/applications/$f.desktop ] && cp /usr/share/applications/$f.desktop "$D/" && chmod +x "$D/$f.desktop"
 done
+# Live installer: say Hana Remix instead of Xubuntu (desktop copy only)
+for f in "$D"/*nstall*.desktop "$HOME/Desktop"/*nstall*.desktop; do
+  [ -f "$f" ] && sed -i -e 's#^Name=.*#Name=Install Hana Remix#' -e 's#^Name\[ja\]=.*##' -e '/^Name=/a Name[ja]=Hana Remix をインストール' "$f"
+done
+# If the desktop folder name changed with the language, show launchers in both
+[ "$D" != "$HOME/Desktop" ] && [ -d "$HOME/Desktop" ] && cp "$D"/hana-*.desktop "$D"/vlc.desktop "$HOME/Desktop/" 2>/dev/null
 # VLC: point at its real icon file so the desktop never shows a blank gear
-[ -f "$D/vlc.desktop" ] && sed -i 's#^Icon=.*#Icon=/usr/share/icons/hicolor/128x128/apps/vlc.png#' "$D/vlc.desktop"
+for f in "$D/vlc.desktop" "$HOME/Desktop/vlc.desktop"; do [ -f "$f" ] && sed -i 's#^Icon=.*#Icon=/usr/share/icons/hicolor/128x128/apps/vlc.png#' "$f"; done
 # Trust launchers (xfdesktop checks a checksum of the file contents)
-for f in "$D"/*.desktop; do
+for f in "$D"/*.desktop "$HOME/Desktop"/*.desktop; do
+  [ -f "$f" ] || continue
   gio set -t string "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" | cut -d' ' -f1)" 2>/dev/null
   gio set "$f" metadata::trusted true 2>/dev/null
 done
