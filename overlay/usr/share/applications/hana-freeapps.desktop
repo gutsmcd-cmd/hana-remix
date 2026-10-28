@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Free Apps
+Name[ja]=無料アプリ
+Comment=Mat's free offline apps
+Comment[ja]=オフラインで使える無料アプリ集
+Exec=firefox --new-window https://gutsmcd-cmd.github.io/free-apps/
+Icon=/usr/share/pixmaps/hana-freeapps.png
+Categories=Network;

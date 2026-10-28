@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Universe 74
+Name[ja]=ユニバース74
+Comment=Online apps
+Comment[ja]=オンラインアプリ集
+Exec=firefox --new-window https://gutsmcd-cmd.github.io/universe-74/
+Icon=/usr/share/pixmaps/hana-universe74.png
+Categories=Network;
